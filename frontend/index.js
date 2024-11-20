@@ -7,6 +7,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         const oldData = await oldRes.json();
         const resD = await fetch("http://localhost:3001/resD");
 
+
+
+
+
         
         const ResData = await resD.json();
         const rollD = await fetch("http://localhost:3001/rollD");
