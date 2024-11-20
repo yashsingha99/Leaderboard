@@ -1,14 +1,37 @@
+// import data from "../data.json"
 document.addEventListener('DOMContentLoaded', async () => {
     try {
         const response = await fetch("http://localhost:3001/data");
         const data = await response.json();
+        const oldRes = await fetch("http://localhost:3001/oldData");
+        const oldData = await oldRes.json();
+        const resD = await fetch("http://localhost:3001/resD");
+        const ResData = await resD.json();
+        const rollD = await fetch("http://localhost:3001/rollD");
+        const RollD = await rollD.json();
+        console.log(oldData);
+        var table = []; // Initialize an empty array
+
+        for (let i = 0; i < RollD.length; i++) {
+            if (!table[RollD[i]]) {
+                table[RollD[i]] = [];
+            }
+            table[RollD[i]].push(ResData[i]);
+        }
+        
+        console.log(table);
+        
         let filteredData = [...data]; // Keep original data separate
         const leaderboardBody = document.getElementById('leaderboard-body');
         const sectionFilter = document.getElementById('section-filter');
 
         // Populate section filter dropdown
         const populateSectionFilter = () => {
-            const sections = [...new Set(data.map(student => student.section || 'N/A'))].sort();
+            const sections = [...new Set(data.map(student => student.section || 'N/A'))]
+            
+            sections.push("Day Scholars")
+            sections.push("Hostellers")
+            sections.sort()
             sectionFilter.innerHTML = '<option value="all">All Sections</option>';
             sections.forEach(section => {
                 const option = document.createElement('option');
@@ -50,7 +73,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Function to render the leaderboard
         const renderLeaderboard = (sortedData) => {
             leaderboardBody.innerHTML = '';
-            sortedData.forEach((student, index) => {
+            sortedData.forEach((student, index) => 
+                {
                 const row = document.createElement('tr');
                 row.classList.add('border-b', 'border-gray-700');
                 row.innerHTML = `
@@ -63,6 +87,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     </td>
                     <td class="p-4">${student.section || 'N/A'}</td>
                     <td class="p-4">${student.totalSolved || 'N/A'}</td>
+                    <td class="p-4">${oldData[student.roll]  || 'N/A'}</td>
+                    <td class="p-4">${student.totalSolved - oldData[student.roll]  || 'N/A'}</td>
                     <td class="p-4 text-green-400">${student.easySolved || 'N/A'}</td>
                     <td class="p-4 text-yellow-400">${student.mediumSolved || 'N/A'}</td>
                     <td class="p-4 text-red-400">${student.hardSolved || 'N/A'}</td>
@@ -73,9 +99,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Filter function
         const filterData = (section) => {
-            filteredData = section === 'all' 
-                ? [...data]
-                : data.filter(student => (student.section || 'N/A') === section);
+            if(section === 'all' ){
+                filteredData = [...data]
+            } else    if(section === 'Hostellers' ){
+                 
+                filteredData = data.filter((student) => table[student.roll][0] === 'Hostellers');
+            } else    if(section === 'Day Scholars' ){
+                filteredData = data.filter((student) => table[student.roll][0] === 'Day Scholars');
+            } else {
+                filteredData = data.filter(student => (student.section || 'N/A') === section);
+            }
             renderLeaderboard(filteredData);
         };
 

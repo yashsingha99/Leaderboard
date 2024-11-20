@@ -5,7 +5,9 @@ const axios = require('axios');
 const app = express();
 const port = 3001;
 
-app.use(cors());
+app.use(cors( {
+  origin: '*',
+}));
 
 async function fetchAndSaveData() {
   try {
@@ -20,7 +22,7 @@ async function fetchAndSaveData() {
       return;
     }
 
-    console.log('Input files read successfully.');
+    // console.log('Input files read successfully.');
     const combinedData = [];
 
     for (let i = 0; i < rolls.length; i++) {
@@ -30,13 +32,13 @@ async function fetchAndSaveData() {
       const section = sections[i];
       let studentData = { roll, name, url, section };
 
-      console.log(`Processing data for roll number: ${roll}, name: ${name}, section: ${section}`);
+      // console.log(`Processing data for roll number: ${roll}, name: ${name}, section: ${section}`);
 
       // Check if URL is a LeetCode URL
       if (url.startsWith('https://leetcode.com/u/')) {
         var username = url.split('/u/')[1];
         if(username.charAt(username.length-1) == '/') username = username.substring(0, username.length-1);
-        console.log(`Fetching data for LeetCode username: ${username}`);
+        // console.log(`Fetching data for LeetCode username: ${username}`);
 
         try {
           const response = await axios.get(`https://leetcodeapi-v1.vercel.app/${username}`);
@@ -50,7 +52,7 @@ async function fetchAndSaveData() {
               mediumSolved: data[username].submitStatsGlobal.acSubmissionNum[2].count || 0,
               hardSolved: data[username].submitStatsGlobal.acSubmissionNum[3].count || 0,
             };
-            console.log(`Data for ${username} fetched and processed successfully.`);
+            // console.log(`Data for ${username} fetched and processed successfully.`);
           } else {
             console.log(`No data found for ${username}`);
           }
@@ -58,7 +60,7 @@ async function fetchAndSaveData() {
           console.error(`Error fetching data for ${username}:`, error);
         }
       } else {
-        console.log(`URL for ${name} is not a LeetCode profile. Skipping API call.`);
+        // console.log(`URL for ${name} is not a LeetCode profile. Skipping API call.`);
         studentData.info = 'No LeetCode data available';
       }
       combinedData.push(studentData);
@@ -80,6 +82,15 @@ async function fetchAndSaveData() {
 
 app.get('/data', (req, res) => {
   res.sendFile(__dirname + '/data.json');
+});
+app.get('/oldData', (req, res) => {
+  res.sendFile(__dirname + '/oldData.json');
+});
+app.get('/resD', (req, res) => {
+  res.sendFile(__dirname + '/residance.json');
+});
+app.get('/rollD', (req, res) => {
+  res.sendFile(__dirname + '/rollNo.json');
 });
 
 // Initial data fetch and periodic refresh every hour
